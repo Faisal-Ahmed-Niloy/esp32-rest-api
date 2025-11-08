@@ -21,6 +21,8 @@ const int SERVER_PORT = 8000;
 String userName = "A123"; // current user
 int targetNumber = 0;
 int doneCount = 0;
+bool maintenanceActive = false;   // lock device when maintenance triggered
+bool targetAchieved = false;      // track if target reached
 
 //tft pins
 #define TFT_CS   15
@@ -91,7 +93,8 @@ void loop() {
     fetchTargetFromServer();
   }
 
-  // handle button1 - increment
+ if (!maintenanceActive) {
+  // handle button1 - increment 
   if (digitalRead(BTN1) == LOW) {
     if (millis() - btn1_last > 300) { 
       btn1_last = millis();
@@ -105,20 +108,16 @@ void loop() {
       btn2_pressed = true;
       btn2_press_time = millis();
     } else {
-      // still held - check long press
       if (millis() - btn2_press_time >= longpress_ms) {
-        // trigger maintenance (ensuring single trigger per press)
         onButton2LongPress();
-        // wait for release
-        while (digitalRead(BTN2) == LOW) {
-          delay(10);
-        }
+        while (digitalRead(BTN2) == LOW) { delay(10); }
         btn2_pressed = false;
       }
     }
   } else {
     btn2_pressed = false;
   }
+ }
 
   // update display status area every loop
   drawStatusOnly();
@@ -135,21 +134,21 @@ void onButton1Press() {
   // send JSON to server
   sendDoneToServer();
   drawDisplay();
+
   // if target reached show congrats
-  if (targetNumber > 0 && doneCount >= targetNumber) {
-    showTargetCompleteMessage();
+  if (targetNumber > 0 && doneCount >= targetNumber && !targetAchieved) {
+  showTargetCompleteMessage();   // congrats overlay
+  delay(3000);                   // show for 3s
+  targetAchieved = true;         // mark achieved
   }
 }
 
 void onButton2LongPress() {
   Serial.printf("[BTN2 LONG] Maintenance requested by %s\n", userName.c_str());
-  // show maintenance message on display
-  showMaintenanceMessage();
-  // send notify to server
+  maintenanceActive = true;   // lock device
+  showMaintenanceMessage();   // stays until restart
   sendMaintenanceToServer();
-  // maintenance message stays for 5 seconds
-  delay(5000);
-  drawDisplay();
+  //drawDisplay();
 }
 
 // ---------------------------
@@ -206,6 +205,9 @@ void fetchTargetFromServer() {
     DeserializationError err = deserializeJson(doc, payload);
     if (!err) {
       targetNumber = doc["target"] | 0;
+      if (doneCount < targetNumber) {
+        targetAchieved = false; //reset flag after new target arrives
+      }
       serverReachable = true;
     } else {
       Serial.println("[fetchTarget] JSON parse error");
@@ -329,6 +331,14 @@ void drawDisplay() {
   tft.setTextSize(3);
   tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
   tft.printf("Work Done: %d\n", doneCount);
+  
+  //target achieve
+  if (targetAchieved) {
+  tft.setCursor(6, 160);
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
+  tft.println("Target Achieved!");
+  }
 
   // bottom message area
   tft.setCursor(6, 200);
