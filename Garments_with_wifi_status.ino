@@ -120,8 +120,9 @@ void loop() {
  }
 
   // update display status area every loop
-  drawStatusOnly();
-
+  if (!maintenanceActive) {
+    drawStatusOnly(); // display will not update if maintainance is on 
+  }
   delay(10);
 }
 
@@ -133,7 +134,10 @@ void onButton1Press() {
   Serial.printf("[BTN1] %s doneCount -> %d (target %d)\n", userName.c_str(), doneCount, targetNumber);
   // send JSON to server
   sendDoneToServer();
-  drawDisplay();
+  if (!maintenanceActive) {
+    drawDisplay();  // if maintainance is on, the display will not fetch
+  }
+
 
   // if target reached show congrats
   if (targetNumber > 0 && doneCount >= targetNumber && !targetAchieved) {
