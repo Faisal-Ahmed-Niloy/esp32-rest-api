@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory stores (replace with DB later)
+# store-local
 targets = {}      # { "A123": 10, "B456": 5, ... }
 logs = []         # list of received JSON logs (from ESP32)
 notifications = []  # maintenance messages
