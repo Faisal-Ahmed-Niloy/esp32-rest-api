@@ -1,5 +1,6 @@
 //need to change the wifi config &
 // server ip
+// run "server.py" with this.
 
 #include <WiFi.h>
 #include <HTTPClient.h>
