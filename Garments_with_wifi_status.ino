@@ -14,8 +14,8 @@
 const char* ssid = "Faisal";
 const char* password = "987654321";
 
-// put your PC LAN IP and FastAPI port
-const char* SERVER_IP = "192.168.30.31"; // <<== change this
+// ip & port
+const char* SERVER_IP = "192.168.30.31"; // change as per pc ip 
 const int SERVER_PORT = 8000;
 
 String userName = "A123"; // current user
@@ -107,7 +107,7 @@ void loop() {
     } else {
       // still held - check long press
       if (millis() - btn2_press_time >= longpress_ms) {
-        // trigger maintenance (but ensure single trigger per press)
+        // trigger maintenance (ensuring single trigger per press)
         onButton2LongPress();
         // wait for release
         while (digitalRead(BTN2) == LOW) {
@@ -147,8 +147,8 @@ void onButton2LongPress() {
   showMaintenanceMessage();
   // send notify to server
   sendMaintenanceToServer();
-  // maintenance message stays for 3 seconds
-  delay(3000);
+  // maintenance message stays for 5 seconds
+  delay(5000);
   drawDisplay();
 }
 
