@@ -222,7 +222,9 @@ void fetchTargetFromServer() {
     serverReachable = false;
   }
   http.end();
-  drawDisplay();
+  if (!maintenanceActive) {
+    drawDisplay();
+  }
 }
 
 // Send /data on every BTN1 press with date/time/user/target/done
