@@ -286,7 +286,7 @@ void sendMaintenanceToServer() {
   // build JSON
   DynamicJsonDocument doc(256);
   doc["user"] = userName;
-  doc["message"] = String("Maintenance needed for user ") + userName;
+  doc["message"] = String("Maintenance needed for user: ") + userName;
 
   String json;
   serializeJson(doc, json);
@@ -320,13 +320,18 @@ void drawDisplay() {
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK);
   tft.println("  - GMS -");
-
-  // User & Target
+  
+  // User
   tft.setTextSize(2);
   tft.setCursor(6, 36);
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
   tft.printf("User: %s\n", userName.c_str());
+  
+  //progressBar Area
+  drawProgressBar(doneCount, targetNumber);
 
+ /*  //old layout
+  //target
   tft.setCursor(6, 70);
   tft.setTextSize(3);
   tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
@@ -337,7 +342,36 @@ void drawDisplay() {
   tft.setTextSize(3);
   tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
   tft.printf("Work Done: %d\n", doneCount);
-  
+  */
+
+
+  //new layout of done and target
+
+  // Done count
+  tft.setCursor(6, 100);
+  tft.setTextSize(4); 
+  tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
+  tft.printf("%d", doneCount);
+
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  tft.print(" pcs");
+
+  // Separator
+  tft.setTextSize(4);
+  tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  tft.print(" / ");
+
+  // Target
+  tft.setTextSize(4);
+  tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
+  tft.printf("%d", targetNumber);
+
+  tft.setTextSize(2);
+  tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+  tft.print(" pcs");
+
+
   //target achieve
   if (targetAchieved) {
   tft.setCursor(6, 160);
@@ -350,12 +384,38 @@ void drawDisplay() {
   tft.setCursor(6, 200);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  tft.println("Press & hold Button 2 for    Maintanance Help.");
+  //tft.println("Press & hold Button 2 for    Maintanance Help.");
+  tft.println("Press & hold Button 2 for    Maintenance Help."); // oops! banan bhul hoisilo
+
 
   // status area (top-right)
   drawStatusOnly();
 }
 
+
+// for the progress bar on the top of done/target 
+void drawProgressBar(int done, int target) {
+  int barX = 6, barY = 70, barW = 300, barH = 20;
+
+  // Outline
+  tft.drawRect(barX, barY, barW, barH, ILI9341_WHITE);
+
+  // Fill based on progress
+  int filledW = 0;
+  if (target > 0) {
+    filledW = (done * barW) / target;
+  }
+
+  // Green filled portion
+  tft.fillRect(barX + 1, barY + 1, filledW - 2, barH - 2, ILI9341_GREEN);
+
+  // Red remaining portion
+  if (filledW < barW) {
+    tft.fillRect(barX + filledW, barY + 1, barW - filledW - 1, barH - 2, ILI9341_RED);
+  }
+}
+
+//status display
 void drawStatusOnly() {
   // top-right small boxes for wifi & server status
   int x = 220, y = 7;
@@ -401,9 +461,9 @@ void showTargetCompleteMessage() {
   tft.fillRect(20, 80, 280, 80, ILI9341_BLUE);
   tft.setCursor(30, 100);
   tft.setTextSize(2);
-  tft.setTextColor(ILI9341_WHITE, ILI9341_BLUE);
-  tft.println("Today's Target is done!");
+  tft.setTextColor(ILI9341_GREEN, ILI9341_BLUE);
+  tft.println("Today's Target Completed!"); //minor correction
   tft.setCursor(30, 130);
   tft.println("Well Done!");
-  Serial.println("Displaying: Your Today's Target is done! Well Done!");
+  Serial.println("Displaying: Today's Target Completed! Well Done!");
 }
