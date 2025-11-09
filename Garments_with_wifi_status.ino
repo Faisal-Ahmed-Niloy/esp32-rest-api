@@ -312,6 +312,7 @@ void sendMaintenanceToServer() {
 // ---------------------------
 // display
 // ---------------------------
+
 void drawDisplay() {
   tft.fillScreen(ILI9341_BLACK);
 
@@ -320,73 +321,110 @@ void drawDisplay() {
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_CYAN, ILI9341_BLACK);
   tft.println("  - GMS -");
-  
+
   // User
   tft.setTextSize(2);
   tft.setCursor(6, 36);
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
   tft.printf("User: %s\n", userName.c_str());
-  
-  //progressBar Area
+
+  // progressBar Area (shifted up slightly)
   drawProgressBar(doneCount, targetNumber);
 
- /*  //old layout
-  //target
-  tft.setCursor(6, 70);
-  tft.setTextSize(3);
-  tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
-  tft.printf("Target - %d\n", targetNumber);
-
-  // Done count
-  tft.setCursor(6, 120);
-  tft.setTextSize(3);
-  tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
-  tft.printf("Work Done: %d\n", doneCount);
+  /*  //old layout
+   //target
+   tft.setCursor(6, 70);
+   tft.setTextSize(3);
+   tft.setTextColor(ILI9341_YELLOW, ILI9341_BLACK);
+   tft.printf("Target - %d\n", targetNumber);
+ 
+   // Done count
+   tft.setCursor(6, 120);
+   tft.setTextSize(3);
+   tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
+   tft.printf("Work Done: %d\n", doneCount);
   */
 
+  // new layout of done and target - split by vertical divider
+  int centerX = 160;         // center of screen
+  int numberY = 95;          // Y position for large numbers
+  int pcsY = numberY + 60;   // Y position for "pcs" labels
 
-  //new layout of done and target
+  // Prepare number strings
+  char doneStr[8], targetStr[8];
+  sprintf(doneStr, "%d", doneCount);
+  sprintf(targetStr, "%d", targetNumber);
 
-  // Done count
-  tft.setCursor(6, 100);
-  tft.setTextSize(4); 
+  // Estimate widths for TextSize 6 (≈36px per char)
+  int doneWidth = strlen(doneStr) * 36;
+  int targetWidth = strlen(targetStr) * 36;
+
+  // DONE side (left half)
+  int doneX = centerX - 20 - doneWidth;  // 20px gap from center
+  tft.setCursor(doneX, numberY);
+  tft.setTextSize(6);
   tft.setTextColor(ILI9341_GREEN, ILI9341_BLACK);
-  tft.printf("%d", doneCount);
+  tft.print(doneStr);
 
+  // "pcs" below Done
+  tft.setCursor(doneX, pcsY);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  tft.print(" pcs");
+  tft.print("pcs");
 
-  // Separator
-  tft.setTextSize(4);
-  tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  tft.print(" / ");
-
-  // Target
-  tft.setTextSize(4);
+  // TARGET side (right half)
+  int targetX = centerX + 20;  // 20px gap from center
+  tft.setCursor(targetX, numberY);
+  tft.setTextSize(6);
   tft.setTextColor(ILI9341_RED, ILI9341_BLACK);
-  tft.printf("%d", targetNumber);
+  tft.print(targetStr);
 
+  // "pcs" below Target
+  tft.setCursor(targetX, pcsY);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  tft.print(" pcs");
+  tft.print("pcs");
+
+    // Vertical divider line (4px wide)
+  int dividerX = 158;  // center of screen minus half thickness
+  int dividerYTop = numberY - 10;
+  int dividerYBottom = pcsY + 20;
+  int dividerWidth = 4;
+  tft.fillRect(dividerX, dividerYTop, dividerWidth, dividerYBottom - dividerYTop, ILI9341_WHITE);
 
 
-  //target achieve
+/*  // target achieve
   if (targetAchieved) {
-  tft.setCursor(6, 160);
-  tft.setTextSize(2);
-  tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
-  tft.println("Target Achieved!");
+    tft.setCursor(6, 175); // shifted down 5px to avoid overlap
+    tft.setTextSize(2);
+    tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
+    tft.println("Target Achieved!");
   }
+*/
+
+  // target achieve message - centered and lowered
+  if (targetAchieved) {
+    const char* msg = "Target Achieved!";
+    int textSize = 2;
+    int charWidth = 12; // TextSize 2 ≈ 6px * 2
+    int msgLength = strlen(msg);
+    int msgWidth = msgLength * charWidth;
+
+    int centerX = (320 - msgWidth) / 2;
+    int centerY = 178; // lowered for spacing
+
+    tft.setCursor(centerX, centerY);
+    tft.setTextSize(textSize);
+    tft.setTextColor(ILI9341_MAGENTA, ILI9341_BLACK);
+    tft.println(msg);
+  }
+
 
   // bottom message area
   tft.setCursor(6, 200);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
-  //tft.println("Press & hold Button 2 for    Maintanance Help.");
   tft.println("Press & hold Button 2 for    Maintenance Help."); // oops! banan bhul hoisilo
-
 
   // status area (top-right)
   drawStatusOnly();
@@ -395,7 +433,7 @@ void drawDisplay() {
 
 // for the progress bar on the top of done/target 
 void drawProgressBar(int done, int target) {
-  int barX = 6, barY = 70, barW = 300, barH = 20;
+  int barX = 6, barY = 63, barW = 300, barH = 10; // barY raised by ~7px
 
   // Outline
   tft.drawRect(barX, barY, barW, barH, ILI9341_WHITE);
@@ -404,10 +442,13 @@ void drawProgressBar(int done, int target) {
   int filledW = 0;
   if (target > 0) {
     filledW = (done * barW) / target;
+    if (filledW > barW) filledW = barW; // cap at 100%
   }
 
   // Green filled portion
-  tft.fillRect(barX + 1, barY + 1, filledW - 2, barH - 2, ILI9341_GREEN);
+  if (filledW > 0) {
+    tft.fillRect(barX + 1, barY + 1, filledW - 2, barH - 2, ILI9341_GREEN);
+  }
 
   // Red remaining portion
   if (filledW < barW) {
@@ -462,7 +503,7 @@ void showTargetCompleteMessage() {
   tft.setCursor(30, 100);
   tft.setTextSize(2);
   tft.setTextColor(ILI9341_GREEN, ILI9341_BLUE);
-  tft.println("Today's Target Completed!"); //minor correction
+  tft.println("Target Completed!"); //minor correction
   tft.setCursor(30, 130);
   tft.println("Well Done!");
   Serial.println("Displaying: Today's Target Completed! Well Done!");
