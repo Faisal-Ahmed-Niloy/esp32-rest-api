@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>GMS</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h2>Garments Management System (GMS)</h2>
+
+  <div>
+    <label>User:</label>
+    <select id="user">
+      <option value="A123">A123</option>
+      <option value="B456">B456</option>
+      <option value="C789">C789</option>
+      <option value="etc">etc</option>
+    </select>
+    <label>Today's Target:</label>
+    <input id="target" type="number" value="1" min="0" />
+    <button class="btn" onclick="setTarget()">Send Target → ESP32</button>
+    <button class="btn" onclick="getTarget()">Get Target</button>
+  </div>
+
+  <div class="card">
+    <h4>Latest target for user:</h4>
+    <div id="latest">—</div>
+  </div>
+
+  <div class="card">
+    <h4>Recent logs (from ESP32)</h4>
+    <div id="logs">No logs yet</div>
+    <button class="btn" onclick="refreshLogs()">Refresh</button>
+  </div>
+
+  <div class="card">
+    <h4>Notifications (maintenance)</h4>
+    <div id="notes">No notifications</div>
+    <button class="btn" onclick="refreshNotifications()">Refresh</button>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

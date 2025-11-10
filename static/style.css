@@ -1,0 +1,28 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+label, select, input {
+  font-size: 16px;
+  margin: 6px;
+}
+
+.btn {
+  padding: 8px 12px;
+  font-size: 16px;
+  margin: 6px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 6px;
+}
+
+pre {
+  background: #f6f6f6;
+  padding: 8px;
+  overflow: auto;
+}
